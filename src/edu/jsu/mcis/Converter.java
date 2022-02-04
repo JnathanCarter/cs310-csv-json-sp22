@@ -65,7 +65,7 @@ public class Converter {
         String results = "";
 
         // Add json object and json arrays to hold csv data
-        JSONObject obj = new JSONObject();
+        Map obj = new LinkedHashMap();
         JSONArray columnHeaderArray = new JSONArray();
         JSONArray rowHeaderArray = new JSONArray();
         JSONArray dataArray = new JSONArray();
@@ -111,7 +111,8 @@ public class Converter {
             obj.put("data", dataArray);
 
             // add to Results
-            results = obj.toString().trim();
+            results = JSONValue.toJSONString(obj);
+            // results = obj.toString().trim();
 
         } catch (Exception e) {
             e.printStackTrace();
