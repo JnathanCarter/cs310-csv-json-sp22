@@ -87,8 +87,9 @@ public class Converter {
                         columnHeaderArray.add(element);
                     }
                 } else {
+                    JSONArray tempDataArray = new JSONArray();
+
                     for (int i = 0; i < temp.length; i++) {
-                        JSONArray tempDataArray = new JSONArray();
 
                         if (i == 0) {
                             rowHeaderArray.add(temp[i]);
@@ -97,10 +98,11 @@ public class Converter {
                             tempDataArray.add(Integer.valueOf(temp[i]));
 
                         }
-                        dataArray.add(tempDataArray);
-                    }
-                }
 
+                    }
+                    dataArray.add(tempDataArray);
+                }
+                ++counter;
             }
 
             // Populating JSONObject with data
