@@ -2,6 +2,9 @@ package edu.jsu.mcis;
 
 import java.io.*;
 import java.util.*;
+
+import javax.imageio.stream.MemoryCacheImageOutputStream;
+
 import com.opencsv.*;
 import org.json.simple.*;
 import org.json.simple.parser.*;
@@ -64,54 +67,60 @@ public class Converter {
 
         String results = "";
 
-        // Add json object and json arrays to hold csv data
-        Map obj = new LinkedHashMap();
-        JSONArray columnHeaderArray = new JSONArray();
-        JSONArray rowHeaderArray = new JSONArray();
-        JSONArray dataArray = new JSONArray();
-
         try {
-
             CSVReader reader = new CSVReader(new StringReader(csvString));
             List<String[]> full = reader.readAll();
             Iterator<String[]> iterator = full.iterator();
 
             // INSERT YOUR CODE HERE
 
+            // Add Hashmap and json arrays to hold csv data
+            Map myMap = new LinkedHashMap();
+            JSONArray columnHeaderArray = new JSONArray();
+            JSONArray rowHeaderArray = new JSONArray();
+            JSONArray dataArray = new JSONArray();
+
             // parse csv data into correct arrays
             int counter = 0;
             while (iterator.hasNext()) {
                 String[] temp = iterator.next();
+                // first row is added to the columnHeaderArray
                 if (counter == 0) {
                     for (String element : temp) {
                         columnHeaderArray.add(element);
                     }
-                } else {
-                    JSONArray tempDataArray = new JSONArray();
+                }
+                // Every other row is parsed to seperater rowHeader and data
+                else {
+                    JSONArray rowDataArray = new JSONArray();
 
                     for (int i = 0; i < temp.length; i++) {
 
+                        // first element of row is the rowHeader
                         if (i == 0) {
                             rowHeaderArray.add(temp[i]);
-                        } else {
+                        }
+                        // ever other element is the rowData
+                        else {
 
-                            tempDataArray.add(Integer.valueOf(temp[i]));
+                            rowDataArray.add(Integer.valueOf(temp[i]));
 
                         }
 
                     }
-                    dataArray.add(tempDataArray);
+                    // ever individual row data array is added to the super-set dataArray[]
+                    dataArray.add(rowDataArray);
                 }
                 ++counter;
             }
 
-            // Populating JSONObject with data
-            obj.put("colHeaders", columnHeaderArray);
-            obj.put("rowHeaders", rowHeaderArray);
-            obj.put("data", dataArray);
+            // Populating Map Object with data
+            myMap.put("colHeaders", columnHeaderArray);
+            myMap.put("rowHeaders", rowHeaderArray);
+            myMap.put("data", dataArray);
 
             // add to Results
-            results = JSONValue.toJSONString(obj);
+            results = JSONValue.toJSONString(myMap);
             // results = obj.toString().trim();
 
         } catch (Exception e) {
@@ -132,7 +141,33 @@ public class Converter {
             CSVWriter csvWriter = new CSVWriter(writer, ',', '"', '\\', "\n");
 
             // INSERT YOUR CODE HERE
+            JSONParser parser = new JSONParser();
+            JSONObject jsonObject = (JSONObject) parser.parse(jsonString);
 
+            JSONArray headerArray = (JSONArray) jsonObject.get("colHeaders");
+            JSONArray rowArray = (JSONArray) jsonObject.get("rowHeaders");
+            JSONArray dataArray = (JSONArray) jsonObject.get("data");
+
+           String[] tempHeader = new String[5];
+
+            for (int i = 0; i < headerArray.size();i++) {
+                tempHeader[i] = (String)headerArray.get(i);
+            }
+
+            csvWriter.writeNext(tempHeader);
+
+            for (int i = 0; i < rowArray.size(); i++) {
+                JSONArray currentData = (JSONArray) dataArray.get(i);
+                String[] currentLineToWrite = new String[5];
+
+                currentLineToWrite[0] =((String) rowArray.get(i));
+
+                for (int j = 0; j < currentData.size(); j++) {
+                    currentLineToWrite[j+1] = (Long.toString((long) currentData.get(j)));
+                }
+                csvWriter.writeNext(currentLineToWrite);
+            }
+            results = writer.toString();
         }
 
         catch (Exception e) {
