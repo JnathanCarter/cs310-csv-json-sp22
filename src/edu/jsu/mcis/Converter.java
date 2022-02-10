@@ -115,9 +115,10 @@ public class Converter {
             }
 
             // Populating Map Object with data
-            myMap.put("colHeaders", columnHeaderArray);
+           
             myMap.put("rowHeaders", rowHeaderArray);
             myMap.put("data", dataArray);
+             myMap.put("colHeaders", columnHeaderArray);
 
             // add to Results
             results = JSONValue.toJSONString(myMap);
